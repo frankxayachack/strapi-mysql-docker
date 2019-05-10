@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  api:
+    build: .
+    image: strapi/strapi
+    environment:
+      - APP_NAME=app
+      - DATABASE_CLIENT=mysql
+      - DATABASE_HOST=db
+      - DATABASE_PORT=3306
+      - DATABASE_NAME=mydb
+      - DATABASE_USERNAME=john
+      - DATABASE_PASSWORD=snow
+      - DATABASE_SSL=false
+      - DATABASE_AUTHENTICATION_DATABASE=mydb
+      - HOST=localhost
+    ports:
+      - 1337:1337
+    volumes:
+      - ./app:/usr/src/api/app
+    depends_on:
+      - db
+    restart: always
+
+  db:
+     image: mysql:5.7
+     volumes:
+       - ./db_data:/var/lib/mysql
+     restart: always
+     ports:
+       - 3306:3306
+     environment:
+       MYSQL_ROOT_PASSWORD: rootpass
+       MYSQL_DATABASE: mydb
+       MYSQL_USER: john
+       MYSQL_PASSWORD: snow
+     command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci --init-connect='SET NAMES UTF8;' --innodb-flush-log-at-trx-commit=0
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: 'png-phpmyadmin'
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - '8081:80'
+    volumes:
+      - /sessions
